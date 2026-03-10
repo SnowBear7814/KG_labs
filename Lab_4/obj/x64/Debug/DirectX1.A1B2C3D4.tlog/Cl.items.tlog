@@ -1,0 +1,8 @@
+C:\Users\User\Downloads\Lab_4\src\app\AppBase.cpp;C:\Users\User\Downloads\Lab_4\obj\x64\Debug\AppBase.obj
+C:\Users\User\Downloads\Lab_4\src\app\CubeApp.cpp;C:\Users\User\Downloads\Lab_4\obj\x64\Debug\CubeApp.obj
+C:\Users\User\Downloads\Lab_4\src\core\FrameTimer.cpp;C:\Users\User\Downloads\Lab_4\obj\x64\Debug\FrameTimer.obj
+C:\Users\User\Downloads\Lab_4\src\graphics\Dx12Utils.cpp;C:\Users\User\Downloads\Lab_4\obj\x64\Debug\Dx12Utils.obj
+C:\Users\User\Downloads\Lab_4\src\math\MathUtils.cpp;C:\Users\User\Downloads\Lab_4\obj\x64\Debug\MathUtils.obj
+C:\Users\User\Downloads\Lab_4\src\math\MeshGenerator.cpp;C:\Users\User\Downloads\Lab_4\obj\x64\Debug\MeshGenerator.obj
+C:\Users\User\Downloads\Lab_4\src\resources\TextureLoaderDDS.cpp;C:\Users\User\Downloads\Lab_4\obj\x64\Debug\TextureLoaderDDS.obj
+C:\Users\User\Downloads\Lab_4\src\scene\CameraComponent.cpp;C:\Users\User\Downloads\Lab_4\obj\x64\Debug\CameraComponent.obj

@@ -1,0 +1,37 @@
+﻿  CubeApp.cpp
+C:\Users\User\Downloads\Lab_4\src\app\AppBase.h(49,55): warning C4100: "y": неиспользованный параметр
+  (компиляция исходного файла "src/app/CubeApp.cpp")
+  
+C:\Users\User\Downloads\Lab_4\src\app\AppBase.h(49,48): warning C4100: "x": неиспользованный параметр
+  (компиляция исходного файла "src/app/CubeApp.cpp")
+  
+C:\Users\User\Downloads\Lab_4\src\app\AppBase.h(49,34): warning C4100: "btnState": неиспользованный параметр
+  (компиляция исходного файла "src/app/CubeApp.cpp")
+  
+C:\Users\User\Downloads\Lab_4\src\app\AppBase.h(50,53): warning C4100: "y": неиспользованный параметр
+  (компиляция исходного файла "src/app/CubeApp.cpp")
+  
+C:\Users\User\Downloads\Lab_4\src\app\AppBase.h(50,46): warning C4100: "x": неиспользованный параметр
+  (компиляция исходного файла "src/app/CubeApp.cpp")
+  
+C:\Users\User\Downloads\Lab_4\src\app\AppBase.h(50,32): warning C4100: "btnState": неиспользованный параметр
+  (компиляция исходного файла "src/app/CubeApp.cpp")
+  
+C:\Users\User\Downloads\Lab_4\src\app\AppBase.h(51,55): warning C4100: "y": неиспользованный параметр
+  (компиляция исходного файла "src/app/CubeApp.cpp")
+  
+C:\Users\User\Downloads\Lab_4\src\app\AppBase.h(51,48): warning C4100: "x": неиспользованный параметр
+  (компиляция исходного файла "src/app/CubeApp.cpp")
+  
+C:\Users\User\Downloads\Lab_4\src\app\AppBase.h(51,34): warning C4100: "btnState": неиспользованный параметр
+  (компиляция исходного файла "src/app/CubeApp.cpp")
+  
+C:\Users\User\Downloads\Lab_4\src\app\CubeApp.cpp(8,26): warning C4100: "showCmd": неиспользованный параметр
+C:\Users\User\Downloads\Lab_4\src\app\CubeApp.cpp(8,13): warning C4100: "cmdLine": неиспользованный параметр
+C:\Users\User\Downloads\Lab_4\src\app\CubeApp.cpp(7,51): warning C4100: "prevInstance": неиспользованный параметр
+C:\Users\User\Downloads\Lab_4\src\app\CubeApp.cpp(161,38): warning C4100: "gt": неиспользованный параметр
+C:\Users\User\Downloads\Lab_4\src\app\CubeApp.cpp(228,34): warning C4100: "btnState": неиспользованный параметр
+C:\Users\User\Downloads\Lab_4\src\app\CubeApp.cpp(236,53): warning C4100: "y": неиспользованный параметр
+C:\Users\User\Downloads\Lab_4\src\app\CubeApp.cpp(236,46): warning C4100: "x": неиспользованный параметр
+C:\Users\User\Downloads\Lab_4\src\app\CubeApp.cpp(236,32): warning C4100: "btnState": неиспользованный параметр
+  DirectX12CustomLib.vcxproj -> C:\Users\User\Downloads\Lab_4\bin\x64\Debug\DirectX12CustomLib.exe
