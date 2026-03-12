@@ -3,6 +3,7 @@
 
 #include "../math/MathUtils.h"
 #include "../graphics/GpuUploadBuffer.h"
+#include "ObjLoader.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 				   PSTR cmdLine, int showCmd)
@@ -49,7 +50,7 @@ bool CubeApp::Initialize()
 	BuildConstantBuffers();
     BuildRootSignature();
     BuildShadersAndInputLayout();
-    BuildBoxGeometry();
+    BuildSponzaGeometry();
     BuildPSO();
 
 
@@ -191,10 +192,10 @@ void CubeApp::Draw(const FrameTimer& gt)
 
     mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
 
-    const auto vbv = mBoxGeo->VertexBufferView();
+    const auto vbv = mSponzaGeo->VertexBufferView();
     mCommandList->IASetVertexBuffers(0, 1, &vbv);
 
-    const auto ibv = mBoxGeo->IndexBufferView();
+    const auto ibv = mSponzaGeo->IndexBufferView();
     mCommandList->IASetIndexBuffer(&ibv);
 
     mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -202,7 +203,7 @@ void CubeApp::Draw(const FrameTimer& gt)
     mCommandList->SetGraphicsRootDescriptorTable(0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
 
     mCommandList->DrawIndexedInstanced(
-        mBoxGeo->DrawArgs["box"].IndexCount,
+        mBoxGeo->DrawArgs["sponza"].IndexCount,
         1, 0, 0, 0);
 
     {
@@ -357,102 +358,154 @@ void CubeApp::BuildShadersAndInputLayout()
 	};
 }
 
-void CubeApp::BuildBoxGeometry()
+//void CubeApp::BuildBoxGeometry()
+//{
+//    const XMFLOAT4 cubeColor = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // красный
+//
+//    // 24 вершины: по 4 на каждую грань, чтобы нормали были "плоские" (не усреднялись).
+//    std::array<Vertex, 24> vertices =
+//    {
+//        // Front (z = -1), normal (0,0,-1)
+//        Vertex{{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, cubeColor},
+//        Vertex{{-1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, cubeColor},
+//        Vertex{{+1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, cubeColor},
+//        Vertex{{+1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, cubeColor},
+//
+//        // Back (z = +1), normal (0,0,+1)
+//        Vertex{{-1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, +1.0f}, cubeColor},
+//        Vertex{{+1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, +1.0f}, cubeColor},
+//        Vertex{{+1.0f, +1.0f, +1.0f}, {0.0f, 0.0f, +1.0f}, cubeColor},
+//        Vertex{{-1.0f, +1.0f, +1.0f}, {0.0f, 0.0f, +1.0f}, cubeColor},
+//
+//        // Left (x = -1), normal (-1,0,0)
+//        Vertex{{-1.0f, -1.0f, +1.0f}, {-1.0f, 0.0f, 0.0f}, cubeColor},
+//        Vertex{{-1.0f, +1.0f, +1.0f}, {-1.0f, 0.0f, 0.0f}, cubeColor},
+//        Vertex{{-1.0f, +1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, cubeColor},
+//        Vertex{{-1.0f, -1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, cubeColor},
+//
+//        // Right (x = +1), normal (+1,0,0)
+//        Vertex{{+1.0f, -1.0f, -1.0f}, {+1.0f, 0.0f, 0.0f}, cubeColor},
+//        Vertex{{+1.0f, +1.0f, -1.0f}, {+1.0f, 0.0f, 0.0f}, cubeColor},
+//        Vertex{{+1.0f, +1.0f, +1.0f}, {+1.0f, 0.0f, 0.0f}, cubeColor},
+//        Vertex{{+1.0f, -1.0f, +1.0f}, {+1.0f, 0.0f, 0.0f}, cubeColor},
+//
+//        // Top (y = +1), normal (0,+1,0)
+//        Vertex{{-1.0f, +1.0f, -1.0f}, {0.0f, +1.0f, 0.0f}, cubeColor},
+//        Vertex{{-1.0f, +1.0f, +1.0f}, {0.0f, +1.0f, 0.0f}, cubeColor},
+//        Vertex{{+1.0f, +1.0f, +1.0f}, {0.0f, +1.0f, 0.0f}, cubeColor},
+//        Vertex{{+1.0f, +1.0f, -1.0f}, {0.0f, +1.0f, 0.0f}, cubeColor},
+//
+//        // Bottom (y = -1), normal (0,-1,0)
+//        Vertex{{-1.0f, -1.0f, +1.0f}, {0.0f, -1.0f, 0.0f}, cubeColor},
+//        Vertex{{-1.0f, -1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, cubeColor},
+//        Vertex{{+1.0f, -1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, cubeColor},
+//        Vertex{{+1.0f, -1.0f, +1.0f}, {0.0f, -1.0f, 0.0f}, cubeColor},
+//    };
+//
+//    // 36 индексов (6 граней * 2 треугольника * 3)
+//    std::array<std::uint16_t, 36> indices =
+//    {
+//        // front
+//        0, 1, 2,   0, 2, 3,
+//        // back
+//        4, 5, 6,   4, 6, 7,
+//        // left
+//        8, 9,10,   8,10,11,
+//        // right
+//        12,13,14,  12,14,15,
+//        // top
+//        16,17,18,  16,18,19,
+//        // bottom
+//        20,21,22,  20,22,23
+//    };
+//
+//    const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+//    const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+//
+//    mBoxGeo = std::make_unique<MeshGeometry>();
+//    mBoxGeo->Name = "Kab4";
+//
+//    ThrowIfFailed(D3DCreateBlob(vbByteSize, &mBoxGeo->VertexBufferCPU));
+//    CopyMemory(mBoxGeo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+//
+//    ThrowIfFailed(D3DCreateBlob(ibByteSize, &mBoxGeo->IndexBufferCPU));
+//    CopyMemory(mBoxGeo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+//
+//    mBoxGeo->VertexBufferGPU = Dx12Utils::CreateDefaultBuffer(
+//        md3dDevice.Get(), mCommandList.Get(),
+//        vertices.data(), vbByteSize,
+//        mBoxGeo->VertexBufferUploader
+//    );
+//
+//    mBoxGeo->IndexBufferGPU = Dx12Utils::CreateDefaultBuffer(
+//        md3dDevice.Get(), mCommandList.Get(),
+//        indices.data(), ibByteSize,
+//        mBoxGeo->IndexBufferUploader
+//    );
+//
+//    mBoxGeo->VertexByteStride = sizeof(Vertex);
+//    mBoxGeo->VertexBufferByteSize = vbByteSize;
+//    mBoxGeo->IndexFormat = DXGI_FORMAT_R16_UINT;
+//    mBoxGeo->IndexBufferByteSize = ibByteSize;
+//
+//    SubmeshGeometry submesh;
+//    submesh.IndexCount = (UINT)indices.size();
+//    submesh.StartIndexLocation = 0;
+//    submesh.BaseVertexLocation = 0;
+//
+//    mBoxGeo->DrawArgs["box"] = submesh;
+//}
+
+void CubeApp::BuildSponzaGeometry()
 {
-    const XMFLOAT4 cubeColor = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // красный
-
-    // 24 вершины: по 4 на каждую грань, чтобы нормали были "плоские" (не усреднялись).
-    std::array<Vertex, 24> vertices =
+    ObjMesh mesh;
+    if (!ObjLoader::Load("content/models/sponza.obj", mesh))
     {
-        // Front (z = -1), normal (0,0,-1)
-        Vertex{{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, cubeColor},
-        Vertex{{-1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, cubeColor},
-        Vertex{{+1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, cubeColor},
-        Vertex{{+1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, cubeColor},
+        throw std::runtime_error("Failed to load sponza.obj");
+    }
 
-        // Back (z = +1), normal (0,0,+1)
-        Vertex{{-1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, +1.0f}, cubeColor},
-        Vertex{{+1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, +1.0f}, cubeColor},
-        Vertex{{+1.0f, +1.0f, +1.0f}, {0.0f, 0.0f, +1.0f}, cubeColor},
-        Vertex{{-1.0f, +1.0f, +1.0f}, {0.0f, 0.0f, +1.0f}, cubeColor},
+    mSponzaGeo = std::make_unique<MeshGeometry>();
+    mSponzaGeo->Name = "Sponza";
 
-        // Left (x = -1), normal (-1,0,0)
-        Vertex{{-1.0f, -1.0f, +1.0f}, {-1.0f, 0.0f, 0.0f}, cubeColor},
-        Vertex{{-1.0f, +1.0f, +1.0f}, {-1.0f, 0.0f, 0.0f}, cubeColor},
-        Vertex{{-1.0f, +1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, cubeColor},
-        Vertex{{-1.0f, -1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, cubeColor},
+    const UINT vbByteSize = (UINT)mesh.Vertices.size() * sizeof(Vertex);
+    const UINT ibByteSize = (UINT)mesh.Indices.size() * sizeof(std::uint16_t);
 
-        // Right (x = +1), normal (+1,0,0)
-        Vertex{{+1.0f, -1.0f, -1.0f}, {+1.0f, 0.0f, 0.0f}, cubeColor},
-        Vertex{{+1.0f, +1.0f, -1.0f}, {+1.0f, 0.0f, 0.0f}, cubeColor},
-        Vertex{{+1.0f, +1.0f, +1.0f}, {+1.0f, 0.0f, 0.0f}, cubeColor},
-        Vertex{{+1.0f, -1.0f, +1.0f}, {+1.0f, 0.0f, 0.0f}, cubeColor},
+    // Создаем CPU буферы
+    ThrowIfFailed(D3DCreateBlob(vbByteSize, &mSponzaGeo->VertexBufferCPU));
+    CopyMemory(mSponzaGeo->VertexBufferCPU->GetBufferPointer(), mesh.Vertices.data(), vbByteSize);
 
-        // Top (y = +1), normal (0,+1,0)
-        Vertex{{-1.0f, +1.0f, -1.0f}, {0.0f, +1.0f, 0.0f}, cubeColor},
-        Vertex{{-1.0f, +1.0f, +1.0f}, {0.0f, +1.0f, 0.0f}, cubeColor},
-        Vertex{{+1.0f, +1.0f, +1.0f}, {0.0f, +1.0f, 0.0f}, cubeColor},
-        Vertex{{+1.0f, +1.0f, -1.0f}, {0.0f, +1.0f, 0.0f}, cubeColor},
+    ThrowIfFailed(D3DCreateBlob(ibByteSize, &mSponzaGeo->IndexBufferCPU));
+    CopyMemory(mSponzaGeo->IndexBufferCPU->GetBufferPointer(), mesh.Indices.data(), ibByteSize);
 
-        // Bottom (y = -1), normal (0,-1,0)
-        Vertex{{-1.0f, -1.0f, +1.0f}, {0.0f, -1.0f, 0.0f}, cubeColor},
-        Vertex{{-1.0f, -1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, cubeColor},
-        Vertex{{+1.0f, -1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, cubeColor},
-        Vertex{{+1.0f, -1.0f, +1.0f}, {0.0f, -1.0f, 0.0f}, cubeColor},
-    };
-
-    // 36 индексов (6 граней * 2 треугольника * 3)
-    std::array<std::uint16_t, 36> indices =
-    {
-        // front
-        0, 1, 2,   0, 2, 3,
-        // back
-        4, 5, 6,   4, 6, 7,
-        // left
-        8, 9,10,   8,10,11,
-        // right
-        12,13,14,  12,14,15,
-        // top
-        16,17,18,  16,18,19,
-        // bottom
-        20,21,22,  20,22,23
-    };
-
-    const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
-    const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
-
-    mBoxGeo = std::make_unique<MeshGeometry>();
-    mBoxGeo->Name = "Kab4";
-
-    ThrowIfFailed(D3DCreateBlob(vbByteSize, &mBoxGeo->VertexBufferCPU));
-    CopyMemory(mBoxGeo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
-
-    ThrowIfFailed(D3DCreateBlob(ibByteSize, &mBoxGeo->IndexBufferCPU));
-    CopyMemory(mBoxGeo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
-
-    mBoxGeo->VertexBufferGPU = Dx12Utils::CreateDefaultBuffer(
+    // Создаем GPU буферы
+    mSponzaGeo->VertexBufferGPU = Dx12Utils::CreateDefaultBuffer(
         md3dDevice.Get(), mCommandList.Get(),
-        vertices.data(), vbByteSize,
-        mBoxGeo->VertexBufferUploader
+        mesh.Vertices.data(), vbByteSize,
+        mSponzaGeo->VertexBufferUploader
     );
 
-    mBoxGeo->IndexBufferGPU = Dx12Utils::CreateDefaultBuffer(
+    mSponzaGeo->IndexBufferGPU = Dx12Utils::CreateDefaultBuffer(
         md3dDevice.Get(), mCommandList.Get(),
-        indices.data(), ibByteSize,
-        mBoxGeo->IndexBufferUploader
+        mesh.Indices.data(), ibByteSize,
+        mSponzaGeo->IndexBufferUploader
     );
 
-    mBoxGeo->VertexByteStride = sizeof(Vertex);
-    mBoxGeo->VertexBufferByteSize = vbByteSize;
-    mBoxGeo->IndexFormat = DXGI_FORMAT_R16_UINT;
-    mBoxGeo->IndexBufferByteSize = ibByteSize;
+    mSponzaGeo->VertexByteStride = sizeof(Vertex);
+    mSponzaGeo->VertexBufferByteSize = vbByteSize;
+    mSponzaGeo->IndexFormat = DXGI_FORMAT_R16_UINT;
+    mSponzaGeo->IndexBufferByteSize = ibByteSize;
 
+    // Создаем подобласть для всей модели
     SubmeshGeometry submesh;
-    submesh.IndexCount = (UINT)indices.size();
+    submesh.IndexCount = (UINT)mesh.Indices.size();
     submesh.StartIndexLocation = 0;
     submesh.BaseVertexLocation = 0;
 
-    mBoxGeo->DrawArgs["box"] = submesh;
+    mSponzaGeo->DrawArgs["sponza"] = submesh;
+
+    // Масштабируем модель если нужно
+    XMMATRIX scale = XMMatrixScaling(0.01f, 0.01f, 0.01f); // Sponza обычно большая
+    XMStoreFloat4x4(&mWorld, scale);
 }
 
 void CubeApp::BuildPSO()
