@@ -110,6 +110,74 @@ void centerAndScale(Model& m){
         v = (v - center) * (2.0f / scale);
 }
 
+// ======================= Draw Cube =======================
+void drawCube(std::vector<unsigned char>& image, std::vector<float>& zbuf, int W, int H) {
+    // Вершины куба (единичный куб от -0.95 до 0.95)
+    Vec3 cubeVerts[8] = {
+        {-0.95, -0.95, -0.95}, {0.95, -0.95, -0.95}, {0.95, -0.95, 0.95}, {-0.95, -0.95, 0.95},  // нижняя грань
+        {-0.95, 0.95, -0.95}, {0.95, 0.95, -0.95}, {0.95, 0.95, 0.95}, {-0.95, 0.95, 0.95}       // верхняя грань
+    };
+    
+    // Индексы для 12 треугольников (6 граней * 2 треугольника)
+    int indices[12][3] = {
+        {0, 1, 2}, {0, 2, 3},
+        {4, 6, 5}, {4, 7, 6},
+        {3, 2, 6}, {3, 6, 7},
+        {0, 5, 1}, {0, 4, 5},
+        {0, 3, 7}, {0, 7, 4},
+        {1, 6, 2}, {1, 5, 6}
+    };
+
+    // Цвет куба
+    unsigned char cubeColor[3] = {100, 150, 255};
+
+    for (int tri = 0; tri < 12; tri++) {
+        Vec3 v[3];
+        Vec2 p[3];
+        
+        for (int i = 0; i < 3; i++) {
+            v[i] = cubeVerts[indices[tri][i]];
+            p[i].x = (v[i].x + 1.0f) * 0.5f * W;
+            p[i].y = (v[i].y + 1.0f) * 0.5f * H;
+        }
+
+        // Bounding box треугольника
+        int minX = std::max(0, (int)std::floor(std::min({p[0].x, p[1].x, p[2].x})));
+        int maxX = std::min(W-1, (int)std::ceil(std::max({p[0].x, p[1].x, p[2].x})));
+        int minY = std::max(0, (int)std::floor(std::min({p[0].y, p[1].y, p[2].y})));
+        int maxY = std::min(H-1, (int)std::ceil(std::max({p[0].y, p[1].y, p[2].y})));
+
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                Vec3 bc = barycentric2D(p[0], p[1], p[2], {(float)x + 0.5f, (float)y + 0.5f});
+                if (bc.x < 0 || bc.y < 0 || bc.z < 0) continue;
+
+                float z = v[0].z * bc.x + v[1].z * bc.y + v[2].z * bc.z;
+                int idx = x + y * W;
+                
+                if (z <= zbuf[idx]) continue;
+                
+                float oldZ = zbuf[idx];
+                zbuf[idx] = z;
+
+                // Смешиваем с существующим цветом (альфа-смешивание 50%)
+                unsigned char bgColor[3] = {
+                    image[idx*3+0],
+                    image[idx*3+1], 
+                    image[idx*3+2]
+                };
+                
+                // Полупрозрачное смешивание (50% куб, 50% фон)
+                image[idx*3+0] = (unsigned char)(cubeColor[0] * 0.5f + bgColor[0] * 0.5f);
+                image[idx*3+1] = (unsigned char)(cubeColor[1] * 0.5f + bgColor[1] * 0.5f);
+                image[idx*3+2] = (unsigned char)(cubeColor[2] * 0.5f + bgColor[2] * 0.5f);
+                
+                zbuf[idx] = oldZ;
+            }
+        }
+    }
+}
+
 // ======================= MAIN =======================
 int main(){
     const int W = 512, H = 512;
@@ -167,6 +235,8 @@ int main(){
         }
     }
 
+    drawCube(image, zbuf, W, H);
+                    
     int ok = stbi_write_png("/tmp/result.png", W, H, 3, image.data(), W*3);
     std::cout << "stbi_write_png returned " << ok << std::endl;
     std::cout << "Open /tmp/result.png" << std::endl;
