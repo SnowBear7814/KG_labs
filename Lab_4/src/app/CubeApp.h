@@ -1,19 +1,14 @@
-﻿#pragma once
+#pragma once
 
 #include "../math/MathUtils.h"
 #include "../graphics/GpuUploadBuffer.h"
 #include "AppBase.h"
+#include "ObjLoader.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
-struct Vertex
-{
-	XMFLOAT3 Pos;
-	XMFLOAT3 Normal;
-	XMFLOAT4 Color; // albedo
-};
 
 struct ObjectConstants
 {
@@ -56,6 +51,7 @@ private:
     void BuildRootSignature();
     void BuildShadersAndInputLayout();
     void BuildBoxGeometry();
+    void BuildSponzaGeometry();
     void BuildPSO();
 
 private:
@@ -93,6 +89,8 @@ private:
     bool mKeyS = false;
     bool mKeyD = false;
     
+    std::unique_ptr<MeshGeometry> mSponzaGeo; // Геометрия Sponza
+
     // Скорость движения камеры
     float mCameraSpeed = 5.0f;
 };
